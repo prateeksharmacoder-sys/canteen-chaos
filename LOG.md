@@ -34,49 +34,31 @@ honestly still counts for something.
 **Time:** About 20 minutes, most of it spent tracking down conflicting text colors and checking which styles were overriding the dark mode theme.
 
 
+### CC-extra-bug-1 : "checkout option is not visible"
+
+**How i noticed:**
+i was trying to fix cc-4 on dimension = tablets i noticed that the checkout option is not visible on tablets  
+![alt text](extra-bug-1.png)
+
+**Reproduced:**Opened the website on an iPad Mini and viewed the cart panel. The cart items occupied too much vertical space, causing the coupon section, total and Checkout button to be pushed out of view.
+
+**Cause:** The .cart-items container was taking up too much available space because of its flex sizing. This left insufficient room for the coupon section and checkout footer within the tablet's viewport.
+
+**Fix:** Changed the .cart-items CSS property from flex: 1 to flex: 0.2, reducing the space allocated to the cart items and leaving more room for the checkout section.
+
+**Checked:** The coupon section, subtotal, GST, total and Checkout button are now visible in the iPad Mini and all responsive dimensions layouts. The cart items remain scrollable, allowing users to access additional dishes.
+
+**Time:** About 20 minutes, most of it spent adjusting the cart's flex layout and testing the checkout panel in tablet view.
 
 
 
 
 
-Delete the example before you submit.
 
 
 
-## Example — delete this
-
-### CC-99 — "The cart total is wrong"
-
-**Reproduced:** Added 2 dosas at Rs. 60 each. The cart showed
-Rs. 119.99999 instead of Rs. 130. Happened every time, on any dish with
-a price ending in .50.
-
-**Cause:** The total was being added up with plain floating point and
-never rounded, so 0.1 + 0.2 style errors showed up on screen. The
-rounding helper existed but this one place was not using it.
-
-**Fix:** Ran the total through the existing rounding helper instead of
-adding a new one, so every price on screen goes through the same path.
-
-**Checked:** Cart, checkout and the order screen all show Rs. 130 now.
-Prices without decimals still show without a trailing .00.
-
-**Time:** about 40 minutes, most of it working out that the cart and the
-order screen round in different places.
 
 
-
-## CC-0X — "<the complaint, in short>"
-
-**Reproduced:**
-
-**Cause:**
-
-**Fix:**
-
-**Checked:**
-
-**Time:**
 
 
 
