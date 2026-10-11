@@ -6,6 +6,21 @@ This file is read as carefully as your code. A correct fix you cannot
 explain counts for little; a bug you could not fix but investigated
 honestly still counts for something.
 
+
+### CC-01 : "The search suggestions are behind everything"
+
+**Reproduced:** Started typing a dish name("bread") in the search bar. The list of suggestions appeared, but some suggestions are hidden behind the menu category navigation bar. first suggestion and second partially part was not clickable.
+
+**Cause:** The search suggestions dropdown (.cat-tabs) had an incorrect stacking order (z-index =40 ), causing other page elements to appear in front of it.this prevented clicks from reaching the suggestions.
+
+**Fix:** Corrected stacking order (z-index = 0) so that it appears above the page content. Checked the parent containers for overflow restrictions and ensured that no overlapping elements block clicks on the suggestions.
+
+**Checked:** All search suggestions are visible and clickable. Selecting a dish works correctly, and the dropdown displays above other page elements without being cut off.
+
+**Time:** About 10 minutes, most of it spent identifying which element (css class- name from inspect) was covering the dropdown and why clicks were not reaching the suggestions.
+
+
+
 Delete the example before you submit.
 
 
