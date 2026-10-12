@@ -34,6 +34,9 @@ honestly still counts for something.
 **Time:** About 20 minutes, most of it spent tracking down conflicting text colors and checking which styles were overriding the dark mode theme.
 
 
+
+
+
 ### CC-extra-bug-1 : "checkout option is not visible"
 
 **How i noticed:**
@@ -68,18 +71,18 @@ For anything you investigated but did not solve. Say what you tried and
 where you got to. This is worth marks — leaving it blank when you got
 stuck is not.
 
-### CC-0X — "<the complaint>"
+### CC-03 — "The menu is wider than my phone"
 
 **What I tried:**
+I couldn't find any bug that is mentioned , everything is looking fine on mobile screen as well.
+
 
 **Where I got to:**
+I inspected the menu container to identify the cause of the excessive width.
+I checked for any fixed-width elements or large margins that might be contributing to the overflow.
+I looked for any flexbox properties that could be causing the items to expand beyond the viewport.
 
 **What I would try next:**
 
 
 
-## Extra credit
-
-Anything not on the bug log: a problem you found yourself, a test you
-wrote, or a fix you are unsure about. Same format, plus one line on how
-you noticed it.
