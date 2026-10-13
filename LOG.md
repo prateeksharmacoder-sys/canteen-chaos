@@ -34,7 +34,32 @@ honestly still counts for something.
 **Time:** About 20 minutes, most of it spent tracking down conflicting text colors and checking which styles were overriding the dark mode theme.
 
 
+### CC-04 : "The buttons don't work on my tablet"
 
+**Reproduced:** Opened the website on a tablet and tapped the "Add to Cart" and star buttons to add and save dishes. Both buttons appeared normal, but tapping them did nothing. The same buttons worked correctly on a phone and desktop mode.
+
+**Cause:** The tablet-specific CSS media query for screen widths between 761px and 900px created transparent pseudo-elements (.dish-card::after and .img-wrap::after) over the dish cards. that layer intercept taps on the buttons, preventing their click events from reaching the intended elements.
+
+**Fix:** Removed the entire tablet-specific CSS block for the 761px–900px screen-width range, including the transparent pseudo-elements and their associated positioning and stacking rules. 
+
+
+**Checked:** Tested the "Add to Cart" and star buttons on the affected tablet after removing the CSS block. Both buttons responded correctly, allowing dishes to be added to the cart and saved. The existing functionality on laptops and phones remained unaffected.
+![alt text](cc-4-bug.png)
+
+**Time:** About 40 minutes, most of it spent investigating tablet-specific touch interactions, inspecting CSS stacking and positioning, and testing the buttons after removing the problematic styles.
+
+### CC-05: "The category bar scrolls away on my phone"
+
+**Reproduced:** Opened the website on a phone and scrolled down through the menu dishes. The category and filter bar scrolled away instead of remaining visible at the top while browsing the menu.
+
+**Cause:**  The .view container had overflow-x: hidden, which was interfering with the intended sticky positioning of the category and filter bar on smaller screens.
+
+**Fix:** Changed overflow-x: hidden to overflow-x: visible inside the mobile CSS media query (max-width: 480px). This allowed the category and filter bar to remain visible at the top while scrolling through the menu.
+
+**Checked:** Tested the website on a phone after updating the CSS. Verified that the category and filter bar remained visible while scrolling through the menu dishes.
+![alt text](image.png)
+
+**Time:** About 20 minutes, including investigating the mobile CSS overflow behavior, updating the property, and testing the scrolling behavior.
 
 
 ### CC-extra-bug-1 : "checkout option is not visible"
