@@ -33,6 +33,10 @@ function validateLine(item, index, menu, now, seen) {
   if (qty > MAX_QTY_PER_DISH) {
     errors.push(`${where}: you cannot order more than ${MAX_QTY_PER_DISH} of one dish`);
   }
+  const stock = Number(dish.stock);
+  if (!Number.isFinite(stock) || qty > stock) {
+    errors.push(`${where}: only ${dish.stock} ${dish.name} in stock`);
+  }
 
   const blocked = blockedReason(dish, now);
   if (blocked && isServedNow(dish, now) === false) errors.push(`${dish.name}: ${blocked}`);
@@ -108,6 +112,11 @@ function reserveStock(items, menu) {
   items.forEach((item) => {
     const dish = next.find((d) => d.id === Number(item.dishId));
     if (!dish) return errors.push(`dish ${item.dishId} vanished`);
+    const stock = Number(dish.stock);
+    if (!Number.isFinite(stock) || item.qty > stock) {
+      errors.push(`only ${dish.stock} ${dish.name} in stock`);
+      return;
+    }
     dish.stock -= item.qty;
   });
 

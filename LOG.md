@@ -78,6 +78,18 @@ i was trying to fix cc-4 on dimension = tablets i noticed that the checkout opti
 
 **Time:** About 20 minutes, most of it spent adjusting the cart's flex layout and testing the checkout panel in tablet view.
 
+### CC-06 : "Customers can order more than the available stock"
+
+**Reproduced:** Added a dish to the cart until its quantity matched the available stock, then tried to increase the quantity again. The menu did let me increase the quantity greater then available stock same problem in every quantity increasing buttom (from menu , cart, dish detail )
+
+**Cause:** The menu's increment button was disabled at the stock limit , so the click handler could not show a warning. The server also checked only whether a dish was sold out.  not  whether the requested quantity exceeded its remaining stock.
+
+**Fix:** Kept the menu increment button active at the stock limit so the user sees an "Only ___ left in stock" warning. Added stock checks to cart quantity changes, order validation, and the final stock reservation.
+
+**Checked:** Verified that an order for 2 items is rejected when only 1 is in stock, that an over-stock reservation is refused without changing stock, and that ordering exactly the available quantity remains valid. JavaScript syntax and editor diagnostics passed.
+
+**Time:** About 3 hours, including checking the menu interaction and server-side stock validation. 
+
 
 
 
@@ -108,6 +120,5 @@ I checked for any fixed-width elements or large margins that might be contributi
 I looked for any flexbox properties that could be causing the items to expand beyond the viewport.
 
 **What I would try next:**
-
 
 

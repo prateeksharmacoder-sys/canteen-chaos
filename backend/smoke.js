@@ -7,6 +7,7 @@
 
 const BASE = process.env.BASE || 'http://localhost:3000';
 const MEMBER = 'smoke-' + Math.random().toString(36).slice(2, 8);
+const validation = require('./logic/validation');
 
 let pass = 0;
 let fail = 0;
@@ -201,6 +202,20 @@ const near = (a, b, tolerance = 0.02) => Math.abs(a - b) < tolerance;
     check('junk dishId rejected', (await bad({ items: [{ dishId: 'abc', qty: 1 }] })).status === 400);
     check('empty order rejected', (await bad({ items: [] })).status === 400);
     check('qty over stock rejected', (await bad({ items: [{ dishId: orderable.id, qty: 99 }] })).status === 400);
+    const oneInStock = { ...orderable, stock: 1 };
+    const overStockErrors = validation.validateLine(
+      { dishId: oneInStock.id, qty: 2 },
+      0,
+      [oneInStock],
+      new Date(),
+      new Set()
+    );
+    check('qty above available stock rejected', overStockErrors.some((error) => error.includes('only 1')));
+    const overStockReservation = validation.reserveStock(
+      [{ dishId: oneInStock.id, qty: 2 }],
+      [oneInStock]
+    );
+    check('over-stock reservation refused', !overStockReservation.ok && overStockReservation.menu[0].stock === 1);
     check('duplicate dish rejected', (await bad({ items: [{ dishId: orderable.id, qty: 1 }, { dishId: orderable.id, qty: 1 }] })).status === 400);
     check('bad room rejected', (await bad({ items: [{ dishId: orderable.id, qty: 1 }], hostelRoom: 'ZZ9' })).status === 400);
     check('long note rejected', (await bad({ items: [{ dishId: orderable.id, qty: 1 }], note: 'x'.repeat(200) })).status === 400);

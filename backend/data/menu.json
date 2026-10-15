@@ -293,7 +293,7 @@
     "category": "Chinese",
     "slot": "evening",
     "image": "img/dish-3.jpg",
-    "stock": 5,
+    "stock": -4,
     "prepMinutes": 12,
     "spicy": true,
     "rating": 3.3,

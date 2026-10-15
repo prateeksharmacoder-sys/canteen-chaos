@@ -23,33 +23,39 @@ function renderCartLines() {
     return;
   }
 
-  render(
-    cartItemsBox,
-    items
-      .map(({ dishId, qty }) => {
-        const dish = state.dishes.find((d) => d.id === dishId);
-        const name = dish ? dish.name : `Dish #${dishId}`;
-        const price = dish ? rupees(dish.price * qty) : '...';
-        const stockNote = dish
-          ? html`<small class="muted">In stock: ${dish.stock}${qty > dish.stock ? ' · cart quantity exceeds stock' : ''}</small>`
-          : '';
+render(
+  cartItemsBox,
+  items
+    .map(({ dishId, qty }) => {
+      const dish = state.dishes.find((d) => d.id === dishId);
+      const name = dish ? dish.name : `Dish #${dishId}`;
+      const price = dish ? rupees(dish.price * qty) : '...';
+      const maxStock = dish ? dish.stock : 0;
+      const isAtMaxStock = qty >= maxStock;
+      const exceedsStock = qty > maxStock;
 
-        return html`<div class="cart-line" data-id="${dishId}">
-          <div class="cart-line-main">
-            <span class="cart-line-name">${name}</span>
-            ${raw(stockNote)}
-            <span class="cart-line-price">${price}</span>
-          </div>
-          <div class="cart-line-actions">
-            <button class="qty-btn small" data-cart="dec" aria-label="One less ${name}">&minus;</button>
-            <span class="qty-value">${qty}</span>
-            <button class="qty-btn small" data-cart="inc" aria-label="One more ${name}">+</button>
-            <button class="link-btn" data-cart="remove">Remove</button>
-          </div>
-        </div>`;
-      })
-      .join('')
-  );
+      const stockNote = dish
+        ? html`<small class="muted ${isAtMaxStock ? 'text-warn' : ''}">
+            In stock: ${dish.stock}${exceedsStock ? ' · quantity exceeds stock' : isAtMaxStock ? ' · maximum reached' : ''}
+          </small>`
+        : '';
+
+      return html`<div class="cart-line" data-id="${dishId}">
+        <div class="cart-line-main">
+          <span class="cart-line-name">${name}</span>
+          ${raw(stockNote)}
+          <span class="cart-line-price">${price}</span>
+        </div>
+        <div class="cart-line-actions">
+          <button class="qty-btn small" data-cart="dec" aria-label="One less ${name}">&minus;</button>
+          <span class="qty-value">${qty}</span>
+          <button class="qty-btn small" data-cart="inc" aria-label="One more ${name}" ${isAtMaxStock ? 'disabled' : ''}>+</button>
+          <button class="link-btn" data-cart="remove">Remove</button>
+        </div>
+      </div>`;
+    })
+    .join('')
+);
 }
 
 function renderBill(quote) {
@@ -182,9 +188,27 @@ delegate(cartItemsBox, '[data-cart]', 'click', (e, node) => {
     toast(`${name} removed`, 'info', {
       action: { label: 'Undo', onClick: () => { undoRemove(); refreshQuote(); } },
     });
-  } else {
-    const result = addToCart(dish, action === 'inc' ? 1 : -1);
-    if (!result.ok) toast(result.reason, 'warn');
+  } else if (action === 'inc') {
+    const currentItem = cartItems().find((item) => item.dishId === dishId);
+    const currentQty = currentItem ? currentItem.qty : 0;
+
+    // Block increment if already at or exceeding stock limit
+    if (currentQty >= dish.stock) {
+      toast(`Only ${dish.stock} left in stock`, 'warn');
+      return;
+    }
+
+    const result = addToCart(dish, 1);
+    if (!result.ok) {
+      toast(result.reason, 'warn');
+      return;
+    }
+  } else if (action === 'dec') {
+    const result = addToCart(dish, -1);
+    if (!result.ok) {
+      toast(result.reason, 'warn');
+      return;
+    }
   }
 
   refreshQuote();

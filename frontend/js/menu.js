@@ -146,6 +146,7 @@ function badgeFor(dish) {
 
 function qtyControl(dish) {
   const qty = cartQty(dish.id);
+  const stock = Number(dish.stock) || 0;
 
   if (qty > 0) {
     return html`<div class="qty-row">
@@ -155,8 +156,14 @@ function qtyControl(dish) {
     </div>`;
   }
 
-  const label = dish.orderable ? 'Add to Cart' : dish.blockedReason || 'Not now';
-  return html`<button class="add-btn" data-action="add" ${raw(dish.orderable ? '' : 'disabled')}>${label}</button>`;
+  const isOrderable = Boolean(dish.orderable && stock > 0);
+  const label = !dish.orderable
+    ? (dish.blockedReason || 'Not now')
+    : stock <= 0
+      ? 'Out of Stock'
+      : 'Add to Cart';
+
+  return html`<button class="add-btn" data-action="add" ${raw(isOrderable ? '' : 'disabled')}>${label}</button>`;
 }
 
 function dishCard(dish) {
