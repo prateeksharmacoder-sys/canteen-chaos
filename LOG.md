@@ -114,15 +114,15 @@ i was trying to fix cc-4 on dimension = tablets i noticed that the checkout opti
 
 ### CC-extra-bug-2: "Order tracking is not working"
 
-**How I noticed:** clicked on track order, order was not visible 
+**How I noticed:** The My Orders page showed "No orders found" despite this browser having seven saved order tokens.
 
-**Reproduced:** Placed an order and opened My Orders. The frontend requested `/api/orders?memberId=...`, but the server compared each order's member ID with a different, unset query parameter. The list therefore showed no orders, so the Track button was unavailable.
+**Reproduced:** The frontend requested `/api/orders?memberId=...`, but the server compared each order's member ID with a different, unset query parameter. The list therefore showed no orders, so the Track buttons were unavailable. Each saved order was still retrievable through `/api/orders/:token`.
 
-**Cause:** The member filter in the orders list route read `req.query.userId` instead of `req.query.memberId`.
+**Cause:** The member filter in the orders list route read `req.query.userId` instead of `req.query.memberId`. Also, My Orders did not use the order tokens that checkout already saved in the browser.
 
-**Fix:** Compare the order's `memberId` with the `memberId` query parameter used by the frontend.
+**Fix:** Compare the order's `memberId` with the `memberId` query parameter used by the frontend. My Orders now also loads and merges saved-token orders so prior orders remain trackable if the member list is empty or fails.
 
-**Checked:** Added a smoke-test regression check that a member's list includes their newly placed order and excludes orders belonging to other members.
+**Checked:** Added a smoke-test regression check that a member's list includes their newly placed order and excludes orders belonging to other members. Verified the patched route against an isolated fixture, and verified in the browser that the screenshot's seven saved order tokens render as seven order cards against the currently running server.
 
 
 
