@@ -154,3 +154,32 @@ I checked for any fixed-width elements or large margins that might be contributi
 I looked for any flexbox properties that could be causing the items to expand beyond the viewport.
 
 **What I would try next:**
+
+
+
+
+### CC-09 — "The menu shows more dishes than it should"
+
+**What I tried:**
+I traced the menu request from the frontend, which requests five dishes per page, through the backend menu route and pagination helper.
+I checked how the helper calculates the current page and the `hasMore` value.
+
+**Where I got to:**
+The helper calculates the current page's items, but the returned `items` field appears to contain the full dish list instead of that page's slice. The route uses this field for its `dishes` response, which likely explains why too many dishes are shown.
+I identified the likely cause but did not make or verify a fix.
+
+**What I would try next:**
+
+
+### CC-10 — "Sorting by price is backwards"
+
+**What I tried:**
+read the price sort options from the menu request to the backend sort comparators.
+I checked the `price-asc` and `price-desc` comparator directions against their labels.
+
+**Where I got to:**
+The `price-asc` comparator currently orders higher prices before lower prices, and `price-desc` does the reverse. This matches the reported behavior. i tried the interchange the parameter but that also not worked
+**What I would try next:**
+
+
+
