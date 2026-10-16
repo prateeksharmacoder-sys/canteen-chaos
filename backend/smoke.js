@@ -255,6 +255,13 @@ const near = (a, b, tolerance = 0.02) => Math.abs(a - b) < tolerance;
     check('eta is sensible', placed.json.etaMinutes > 0 && placed.json.etaMinutes <= 45);
     check('points earned recorded', placed.json.pointsEarned >= 0);
 
+    const memberOrders = await call(`/api/orders?memberId=${encodeURIComponent(MEMBER)}&limit=25`);
+    check(
+      "member order list returns only that member's orders",
+      memberOrders.json.orders.some((order) => order.token === placed.json.token) &&
+        memberOrders.json.orders.every((order) => order.memberId === MEMBER)
+    );
+
     const repeat = await call('/api/orders', {
       method: 'POST',
       idem: 'smoke-key-1',

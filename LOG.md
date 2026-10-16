@@ -112,6 +112,18 @@ i was trying to fix cc-4 on dimension = tablets i noticed that the checkout opti
 
 **Checked:** The smoke test asserts that `FRESHERS24` returns zero discount with the expiry error, guarding the pricing path rather than only checking that the coupon is hidden from the list.
 
+### CC-extra-bug-2: "Order tracking is not working"
+
+**How I noticed:** clicked on track order, order was not visible 
+
+**Reproduced:** Placed an order and opened My Orders. The frontend requested `/api/orders?memberId=...`, but the server compared each order's member ID with a different, unset query parameter. The list therefore showed no orders, so the Track button was unavailable.
+
+**Cause:** The member filter in the orders list route read `req.query.userId` instead of `req.query.memberId`.
+
+**Fix:** Compare the order's `memberId` with the `memberId` query parameter used by the frontend.
+
+**Checked:** Added a smoke-test regression check that a member's list includes their newly placed order and excludes orders belonging to other members.
+
 
 
 

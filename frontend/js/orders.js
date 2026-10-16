@@ -128,32 +128,46 @@ async function loadMyOrders() {
   render(ordersList, skeletonRows(3));
 
   let orders = [];
+  let listError = null;
   try {
     const data = await api.listOrders({ memberId: deviceId(), limit: 25 });
     orders = data.orders;
   } catch (err) {
-    ordersList.innerHTML = '';
-    showStatus(ordersStatus, errorBlock(err, 'ordersRetry'));
-    const retry = $('#ordersRetry');
-    if (retry) retry.addEventListener('click', loadMyOrders);
-    return;
+    listError = err;
+  }
+
+  let tokenError = null;
+  if (state.tokens.length > 0) {
+    const results = await Promise.allSettled(state.tokens.map((token) => api.getOrder(token)));
+
+    const ordersByToken = new Map(orders.map((order) => [order.token, order]));
+    results.forEach((result) => {
+      if (result.status === 'fulfilled') {
+        ordersByToken.set(result.value.token, result.value);
+      } else if (result.reason.status !== 404) {
+        tokenError = tokenError || result.reason;
+      }
+    });
+    orders = [...ordersByToken.values()].sort((a, b) => new Date(b.placedAt) - new Date(a.placedAt));
   }
 
   if (orders.length === 0) {
+    if (listError || tokenError) {
+      ordersList.innerHTML = '';
+      showStatus(ordersStatus, errorBlock(listError || tokenError, 'ordersRetry'));
+      const retry = $('#ordersRetry');
+      if (retry) retry.addEventListener('click', loadMyOrders);
+      return;
+    }
     ordersList.innerHTML = '';
-    return showStatus(
-      ordersStatus,
-      emptyBlock(
-        'No orders found',
-        `Requested member ${deviceId()}. This browser has ${state.tokens.length} saved order token(s).`
-      )
-    );
+    return showStatus(ordersStatus, emptyBlock('No orders found', 'Orders placed on this device will appear here.'));
   }
 
-  showStatus(
-    ordersStatus,
-    html`<p class="status-sub">Requested member ${deviceId()} · server returned ${orders.length} order(s) · this browser has ${state.tokens.length} saved token(s)</p>`
-  );
+  if (listError || tokenError) {
+    showStatus(ordersStatus, errorBlock(listError || tokenError, 'ordersRetry'));
+    const retry = $('#ordersRetry');
+    if (retry) retry.addEventListener('click', loadMyOrders);
+  }
 
   const active = orders.filter((o) => Array.isArray(o.allowedNext) && o.allowedNext.length > 0);
   const past = orders.filter((o) => !Array.isArray(o.allowedNext) || o.allowedNext.length === 0);
