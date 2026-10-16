@@ -90,6 +90,28 @@ i was trying to fix cc-4 on dimension = tablets i noticed that the checkout opti
 
 **Time:** About 3 hours, including checking the menu interaction and server-side stock validation. 
 
+### CC-07: "Cancelling makes it worse"
+
+**Reproduced:** Placed an order, then cancelled it. Instead of returning the reserved plates to available stock, the stock count decreased again.
+
+**Cause:** The cancellation stock-release logic subtracted the order quantity from the current stock instead of adding it back.
+
+**Fix:** Changed stock release to add each cancelled order line's quantity back to its dish. Kept the existing transition guard that rejects cancellation attempts on already-cancelled orders.
+
+**Checked:** The smoke test verifies that cancelling an order restores one plate and that repeating the cancellation is rejected without restoring stock a second time.
+
+**Time:** About 40 minutes, including tracing the cancellation flow, fixing the stock update, and adding regression coverage.
+
+### CC-08: "An old coupon still works"
+
+**Reproduced:** Quoted an order using `FRESHERS24`. The coupon was absent from the available-coupons list, but the quote pricing path could still apply it because it validated uses, order minimums, and slots without checking its expiry.
+
+**Cause:** Coupon listing and order pricing used separate eligibility checks. Only the listing route checked `expiresAt`; quote and order pricing did not.
+
+**Fix:** Added an expiry check to the shared `applyCoupon` pricing function. Expired coupons (and coupons with invalid expiry dates) now return no discount and an explicit expiry error, so both quotes and submitted orders reject them.
+
+**Checked:** The smoke test asserts that `FRESHERS24` returns zero discount with the expiry error, guarding the pricing path rather than only checking that the coupon is hidden from the list.
+
 
 
 
@@ -120,5 +142,3 @@ I checked for any fixed-width elements or large margins that might be contributi
 I looked for any flexbox properties that could be causing the items to expand beyond the viewport.
 
 **What I would try next:**
-
-

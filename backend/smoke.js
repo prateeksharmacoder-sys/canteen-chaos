@@ -165,7 +165,10 @@ const near = (a, b, tolerance = 0.02) => Math.abs(a - b) < tolerance;
       method: 'POST',
       body: { items: [{ dishId: orderable.id, qty: 1 }], couponCode: 'FRESHERS24' },
     });
-    check('expired coupon refused', expired.json.couponDiscount === 0 && !!expired.json.couponError);
+    check(
+      'expired coupon refused',
+      expired.json.couponDiscount === 0 && expired.json.couponError === 'This coupon has expired'
+    );
 
     const unknown = await call('/api/cart/quote', {
       method: 'POST',
@@ -311,6 +314,12 @@ const near = (a, b, tolerance = 0.02) => Math.abs(a - b) < tolerance;
     await call(`/api/orders/${second.json.token}/status`, { method: 'PATCH', body: { status: 'cancelled' } });
     const backStock = (await call(`/api/menu/${orderable.id}`)).json.stock;
     check('cancel puts stock back', backStock === midStock + 1, `${backStock} vs ${midStock + 1}`);
+    const repeatedCancel = await call(`/api/orders/${second.json.token}/status`, {
+      method: 'PATCH',
+      body: { status: 'cancelled' },
+    });
+    const stockAfterRepeatedCancel = (await call(`/api/menu/${orderable.id}`)).json.stock;
+    check('repeated cancellation does not restore stock twice', repeatedCancel.status === 409 && stockAfterRepeatedCancel === backStock);
 
     /* ------------------------------------------------------ loyalty */
     section('loyalty');
